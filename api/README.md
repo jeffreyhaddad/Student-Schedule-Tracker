@@ -1,229 +1,513 @@
-# Student Tracker - Backend API
+# Student Tracker API
 
-Node.js + Express backend with PostgreSQL database.
+A robust NestJS backend API for managing student tasks and schedules. Provides RESTful endpoints with JWT authentication, comprehensive validation, and Swagger documentation.
 
-## 🏗️ Architecture
+## Overview
 
-Clean architecture pattern with layered separation:
+This is the backend service for the Student Tracker application, built with NestJS and TypeORM. It handles authentication, user management, task operations, and schedule management with a PostgreSQL database.
+
+## Technology Stack
+
+- **Framework**: NestJS 11.0.1
+- **Language**: TypeScript
+- **Database**: PostgreSQL
+- **ORM**: TypeORM 0.3.27
+- **Authentication**: JWT + Passport
+- **Validation**: Class Validator + Class Transformer
+- **Documentation**: Swagger/OpenAPI
+- **Password Hashing**: bcrypt/bcryptjs
+- **API Documentation**: Swagger Module
+
+## Prerequisites
+
+- Node.js 16+ 
+- npm 8+
+- PostgreSQL 12+
+
+## Installation
+
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Set Up Database
+
+```bash
+bash setup-db.sh
+```
+
+This script will:
+- Create the `student_tracker` database
+- Load the schema from `database/schema.sql`
+- Insert sample test data
+
+### 3. Configure Environment Variables
+
+Create a `.env` file in the project root:
+
+```env
+# Database Configuration
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USER=postgres
+DATABASE_PASSWORD=your_postgres_password
+DATABASE_NAME=student_tracker
+
+# JWT Configuration
+JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
+
+# Server Configuration
+PORT=3000
+NODE_ENV=development
+```
+
+## Running the Application
+
+### Development Mode
+```bash
+npm run start:dev
+```
+
+### Debug Mode
+```bash
+npm run start:debug
+```
+
+### Production Mode
+```bash
+npm run start:prod
+```
+
+The server will start on `http://localhost:3000` by default.
+
+## API Documentation
+
+Once the server is running, access the interactive Swagger documentation at:
+
+```
+http://localhost:3000/docs
+```
+
+The documentation includes all available endpoints, request/response schemas, and allows testing endpoints directly from the browser.
+
+## Available Scripts
+
+```bash
+# Development
+npm run start        # Start the application
+npm run start:dev    # Start with watch mode
+npm run start:debug  # Start in debug mode
+npm run start:prod   # Start production build
+
+# Build
+npm run build        # Compile TypeScript to JavaScript
+
+# Code Quality
+npm run lint         # Run ESLint
+npm run format       # Format code with Prettier
+
+# Testing
+npm run test         # Run unit tests
+npm run test:watch   # Run tests in watch mode
+npm run test:cov     # Run tests with coverage report
+npm run test:debug   # Debug tests
+npm run test:e2e     # Run end-to-end tests
+```
+
+## Project Structure
 
 ```
 src/
-├── controllers/       # HTTP request handlers
-│   ├── AuthController.js
-│   ├── TaskController.js
-│   ├── StudentController.js
-│   └── ScheduleEntryController.js
-├── services/          # Business logic layer
-│   ├── TaskService.js
-│   ├── StudentService.js
-│   └── ScheduleEntryService.js
-├── domain/
-│   ├── entities/      # Domain models
-│   │   ├── Task.js
-│   │   ├── Student.js
-│   │   └── ScheduleEntry.js
-│   ├── repositories/  # Data access layer
-│   │   ├── TaskRepository.js
-│   │   ├── StudentRepository.js
-│   │   └── ScheduleEntryRepository.js
-│   └── dto/           # Data Transfer Objects
-│       ├── TaskDTO.js
-│       ├── StudentDTO.js
-│       └── ScheduleEntryDTO.js
-├── routes/            # API route definitions
-│   ├── authRoutes.js
-│   ├── taskRoutes.js
-│   ├── studentRoutes.js
-│   └── scheduleEntryRoutes.js
-├── middlewares/       # Express middlewares
-│   ├── authMiddleware.js
-│   └── errorHandler.js
-├── validators/        # Input validation (express-validator)
-│   ├── authValidators.js
-│   ├── taskValidators.js
-│   ├── studentValidators.js
-│   └── scheduleEntryValidators.js
-├── config/
-│   └── db.js          # PostgreSQL connection
-├── utils/
-│   └── helpers.js     # Utility functions
-├── app.js             # Express app setup
-└── server.js          # Server entry point
+├── auth/                        # Authentication module
+│   ├── auth.controller.ts       # Auth endpoints
+│   ├── auth.service.ts          # Auth business logic
+│   ├── auth.module.ts           # Auth module definition
+│   └── dto/
+│       └── login.dto.ts         # Login request schema
+│
+├── student/                     # Student management
+│   ├── student.controller.ts    # Student endpoints
+│   ├── student.service.ts       # Student business logic
+│   ├── student.module.ts        # Student module
+│   └── dto/
+│       ├── create-student.dto.ts
+│       └── update-student.dto.ts
+│
+├── task/                        # Task management
+│   ├── task.controller.ts       # Task endpoints
+│   ├── task.service.ts          # Task business logic
+│   ├── task.module.ts           # Task module
+│   └── dto/
+│       ├── create-task.dto.ts
+│       └── update-task.dto.ts
+│
+├── schedule/                    # Schedule management
+│   ├── schedule.controller.ts   # Schedule endpoints
+│   ├── schedule.service.ts      # Schedule business logic
+│   ├── schedule.module.ts       # Schedule module
+│   └── dto/
+│       ├── create-schedule.dto.ts
+│       └── update-schedule.dto.ts
+│
+├── entities/                    # Database entities
+│   ├── student.entity.ts        # Student entity
+│   ├── task.entity.ts           # Task entity
+│   └── schedule-entry.entity.ts # Schedule entry entity
+│
+├── config/                      # Configuration
+│   └── database.config.ts       # TypeORM database config
+│
+├── app.module.ts                # Root application module
+└── main.ts                      # Application entry point
+
+database/
+└── schema.sql                   # PostgreSQL schema and migrations
 ```
 
-## 🚀 Getting Started
+## API Endpoints
 
-### Prerequisites
-- Node.js 18+
-- PostgreSQL 12+ running
+### Authentication
 
-### Installation
+#### Register New User
+```http
+POST /auth/register
+Content-Type: application/json
 
-```bash
-# Install dependencies
-npm install
-
-# Copy environment template
-cp .env.example .env
-
-# Edit .env with your database credentials
+{
+  "first_name": "John",
+  "last_name": "Doe",
+  "username": "johndoe",
+  "email": "john@example.com",
+  "password": "securePassword123"
+}
 ```
 
-### Database Setup
+#### Login
+```http
+POST /auth/login
+Content-Type: application/json
 
-```bash
-# Create database
-createdb student_tracker
-
-# Run schema
-psql -U postgres -d student_tracker -f database/schema.sql
+{
+  "email": "john@example.com",
+  "password": "securePassword123"
+}
 ```
 
-### Run Development Server
-
-```bash
-npm run dev
+Response:
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIs...",
+  "user": {
+    "id": 1,
+    "username": "johndoe",
+    "email": "john@example.com",
+    "first_name": "John",
+    "last_name": "Doe"
+  }
+}
 ```
 
-Server runs on `http://localhost:4000`
+### Students
 
-## 🔧 Configuration
-
-Edit `.env` file:
-
-```bash
-PORT=4000
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=student_tracker
-DB_USER=student_tracker_user
-DB_PASSWORD=your_password
-CORS_ORIGIN=http://localhost:5173
+#### Get Student Profile
+```http
+GET /student
+Authorization: Bearer {access_token}
 ```
 
-## 🔐 Authentication
+#### Update Student Profile
+```http
+PUT /student
+Authorization: Bearer {access_token}
+Content-Type: application/json
 
-- **Session-based authentication** using in-memory storage
-- Passwords hashed with **bcrypt**
-- Session ID passed via `X-Session-Id` header
-- Sessions stored in Map (lost on server restart)
-
-### Session Flow
-
-1. User registers/logs in → Session created
-2. Session ID returned in `X-Session-Id` response header
-3. Client stores session ID
-4. Client sends session ID in `X-Session-Id` request header
-5. Middleware validates session and attaches user to `req.user`
-
-## 📋 Available Scripts
-
-```bash
-npm run dev      # Start with nodemon (auto-restart)
-npm start        # Start production server
-npm test         # Run tests (not yet implemented)
+{
+  "first_name": "Jane",
+  "last_name": "Smith"
+}
 ```
 
-## 🗄️ Database Schema
+### Tasks
+
+#### Get All Tasks
+```http
+GET /task
+Authorization: Bearer {access_token}
+```
+
+#### Create Task
+```http
+POST /task
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{
+  "title": "Complete Assignment",
+  "description": "Finish math homework",
+  "due_at": "2025-12-31T23:59:59Z",
+  "priority": "high",
+  "category": "homework",
+  "status": "pending"
+}
+```
+
+#### Get Task by ID
+```http
+GET /task/:id
+Authorization: Bearer {access_token}
+```
+
+#### Update Task
+```http
+PUT /task/:id
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{
+  "status": "in-progress",
+  "priority": "normal"
+}
+```
+
+#### Delete Task
+```http
+DELETE /task/:id
+Authorization: Bearer {access_token}
+```
+
+### Schedules
+
+#### Get All Schedules
+```http
+GET /schedule
+Authorization: Bearer {access_token}
+```
+
+#### Create Schedule Entry
+```http
+POST /schedule
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{
+  "title": "Class",
+  "start_time": "2025-12-20T10:00:00Z",
+  "end_time": "2025-12-20T11:00:00Z",
+  "description": "Math Class"
+}
+```
+
+#### Update Schedule Entry
+```http
+PUT /schedule/:id
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{
+  "title": "Updated Class"
+}
+```
+
+#### Delete Schedule Entry
+```http
+DELETE /schedule/:id
+Authorization: Bearer {access_token}
+```
+
+## Database Schema
 
 ### Students Table
 ```sql
-id, first_name, last_name, username, email, password_hash, created_at
+CREATE TABLE students (
+  id SERIAL PRIMARY KEY,
+  first_name VARCHAR(255) NOT NULL,
+  last_name VARCHAR(255) NOT NULL,
+  username VARCHAR(100) UNIQUE NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
 ### Tasks Table
 ```sql
-id, student_id, title, description, status, priority, category, due_at, created_at, updated_at
+CREATE TABLE tasks (
+  id SERIAL PRIMARY KEY,
+  student_id INTEGER NOT NULL REFERENCES students(id),
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  due_at TIMESTAMP,
+  status VARCHAR(50) DEFAULT 'pending',
+  priority VARCHAR(20) DEFAULT 'normal',
+  category VARCHAR(50),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
 ### Schedule Entries Table
 ```sql
-id, student_id, weekday, start_time, end_time, subject, location, notes, is_active, created_at, updated_at
+CREATE TABLE schedule_entries (
+  id SERIAL PRIMARY KEY,
+  student_id INTEGER NOT NULL REFERENCES students(id),
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  start_time TIMESTAMP NOT NULL,
+  end_time TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
-## 🛠️ Development Patterns
+## Authentication
 
-### Request Flow
+The API uses JWT (JSON Web Tokens) for authentication:
+
+1. User registers or logs in
+2. Backend returns an `access_token`
+3. Include token in the `Authorization` header: `Bearer {token}`
+4. Token is validated for protected routes
+
+All endpoints except `/auth/register` and `/auth/login` require authentication.
+
+## Validation
+
+The API implements comprehensive validation using `class-validator`:
+
+- Email format validation
+- Password strength requirements
+- Required field validation
+- Type checking
+- Custom validators
+
+Invalid requests return a `400 Bad Request` with detailed error messages.
+
+## Error Handling
+
+Standard HTTP error codes are used:
+
+- `200 OK` - Successful request
+- `201 Created` - Resource created successfully
+- `400 Bad Request` - Invalid input or validation error
+- `401 Unauthorized` - Missing or invalid authentication
+- `403 Forbidden` - Insufficient permissions
+- `404 Not Found` - Resource not found
+- `500 Internal Server Error` - Server error
+
+## Sample Test Credentials
+
+After running `setup-db.sh`, you can use these credentials to test:
 
 ```
-Request → Route → Validator → Controller → Service → Repository → Database
-                      ↓           ↓          ↓          ↓
-                   Error ← DTO ← Entity ← SQL Result
+Username: johndoe
+Email: johndoe@email.com
+Password: (Check the hashed password in the database or register a new account)
 ```
 
-### Example: Create Task
+## CORS Configuration
 
-1. **Route** (`taskRoutes.js`): `POST /tasks` → validator → controller
-2. **Validator** (`taskValidators.js`): Validate input (title, priority, etc.)
-3. **Controller** (`TaskController.js`): Extract data, call service
-4. **Service** (`TaskService.js`): Business logic, call repository
-5. **Repository** (`TaskRepository.js`): SQL query, return entity
-6. **Entity** (`Task.js`): Map database row to object
-7. **DTO** (`TaskDTO.js`): Format response for client
-8. **Controller**: Return JSON response
+The API has CORS enabled for all origins (`*`). In production, restrict this to specific domains by modifying the CORS configuration in `src/main.ts`.
 
-## 📚 API Documentation
+## Development Tips
 
-See **[../API.md](../API.md)** for complete API reference.
-
-Quick reference:
-- `POST /auth/register` - Create account
-- `POST /auth/login` - Authenticate
-- `POST /auth/logout` - End session
-- `GET /auth/profile` - Get current user
-- `GET /tasks` - List tasks
-- `POST /tasks` - Create task
-- `GET /schedule-entries` - List schedule
-
-## 🧪 Testing
+### Creating a New Module
 
 ```bash
-# Manual testing with curl
-curl -X POST http://localhost:4000/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "first_name": "John",
-    "last_name": "Doe",
-    "username": "johndoe",
-    "email": "john@example.com",
-    "password": "pass123"
-  }'
+nest g module features/new-feature
+nest g controller features/new-feature
+nest g service features/new-feature
 ```
 
-## 📦 Dependencies
+### TypeORM Migrations
 
-- **express** (5.1.0) - Web framework
-- **pg** (8.16.3) - PostgreSQL client
-- **bcrypt** (6.0.0) - Password hashing
-- **express-validator** (7.0.1) - Input validation
-- **cors** (2.8.5) - CORS middleware
-- **dotenv** (17.2.2) - Environment variables
-
-## 🐛 Troubleshooting
-
-### Database Connection Failed
-
+To create a new migration:
 ```bash
-# Check PostgreSQL is running
-psql -U postgres
-
-# Check .env credentials match PostgreSQL user
-# Verify database exists
-psql -U postgres -l | grep student_tracker
+npm run typeorm migration:create src/migrations/MigrationName
 ```
+
+### Debugging
+
+Use VS Code debugger with the debug launch configuration or run:
+```bash
+npm run start:debug
+```
+
+## Production Deployment
+
+### Build for Production
+```bash
+npm run build
+```
+
+### Run in Production
+```bash
+NODE_ENV=production npm run start:prod
+```
+
+### Environment Considerations
+- Use strong JWT secret
+- Enable HTTPS
+- Restrict CORS origins
+- Use environment-specific database URLs
+- Enable database backups
+- Monitor error logs
+- Set up monitoring and alerting
+
+## Troubleshooting
+
+### Database Connection Error
+- Ensure PostgreSQL is running
+- Check `DATABASE_HOST`, `DATABASE_USER`, `DATABASE_PASSWORD` in `.env`
+- Verify database exists
+
+### JWT Errors
+- Ensure `JWT_SECRET` is set in `.env`
+- Check token hasn't expired
+- Verify token format in Authorization header
 
 ### Port Already in Use
-
 ```bash
-# Find process on port 4000
-lsof -i :4000
-
-# Kill it
-kill -9 <PID>
+# Kill process on port 3000
+lsof -ti:3000 | xargs kill -9
 ```
 
-## 📖 More Info
+## Testing
 
-- **Main README**: [../README.md](../README.md)
-- **Setup Guide**: [../SETUP.md](../SETUP.md)
-- **API Reference**: [../API.md](../API.md)
+Run the test suite:
+
+```bash
+# Unit tests
+npm run test
+
+# Watch mode
+npm run test:watch
+
+# Coverage report
+npm run test:cov
+
+# E2E tests
+npm run test:e2e
+```
+
+## Contributing
+
+1. Follow NestJS best practices
+2. Write tests for new features
+3. Use TypeScript for type safety
+4. Format code with `npm run format`
+5. Run linting: `npm run lint`
+
+## License
+
+UNLICENSED
+
+## Support
+
+For issues or questions about the frontend, see the `../frontend/README.md`
+
+---
+
+**Built with NestJS | Powered by TypeORM | Secured with JWT** 🚀

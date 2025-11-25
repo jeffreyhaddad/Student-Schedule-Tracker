@@ -6,7 +6,7 @@ CREATE TABLE if NOT EXISTS students (
     last_name VARCHAR(255) NOT NULL,
     username VARCHAR(100) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -27,7 +27,7 @@ FOR EACH ROW
 EXECUTE PROCEDURE update_updated_at_column();
 
 -- Insert sample data into students table
-INSERT INTO students (first_name, last_name, username, email, password_hash) VALUES
+INSERT INTO students (first_name, last_name, username, email, password) VALUES
 ('John', 'Doe', 'johndoe', 'johndoe@email.com', '$2b$10$EIXZQ1z5Q5Z5Q5Z5Q5Z5QO'),
 ('Jane', 'Smith', 'janesmith', 'janesmith@email.com', '$2b$10$EIXZQ1z5Q5Z5Q5Z5Q5Z5QO'),
 ('Alice', 'Johnson', 'alicej', 'alichjohnson@email.com', '$2b$10$EIXZQ1z5Q5Z5Q5Z5Q5Z5QO')
