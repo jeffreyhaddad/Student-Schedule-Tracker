@@ -392,3 +392,11 @@
     color: #ccc;
     font-style: italic;
 }
+
+/* Highlighted item (navigated-to from dashboard) */
+.highlight {
+    box-shadow: 0 12px 28px rgba(102, 126, 234, 0.25);
+    transform: translateY(-4px);
+    border-left-color: #ffcc00;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}

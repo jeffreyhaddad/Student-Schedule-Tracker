@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useTasks } from '../hooks/useTasks';
 import { useSchedule } from '../hooks/useSchedule';
@@ -81,7 +82,11 @@ export default function Dashboard() {
                   <h3>📋 Tasks ({searchResults.tasks.length})</h3>
                   <div className="task-list">
                     {searchResults.tasks.map((task) => (
-                      <div key={task.id} className="task-item">
+                      <Link
+                        to={`/tasks?id=${task.id}`}
+                        key={task.id}
+                        className="task-item link-item"
+                      >
                         <div className="task-info">
                           <div className="task-title">{task.title}</div>
                           {task.description && <div className="task-description">{task.description}</div>}
@@ -91,7 +96,7 @@ export default function Dashboard() {
                             {task.category && <span className="badge">{task.category}</span>}
                           </div>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </div>
@@ -102,14 +107,18 @@ export default function Dashboard() {
                   <h3>📅 Classes ({searchResults.schedules.length})</h3>
                   <div className="schedule-list">
                     {searchResults.schedules.map((entry) => (
-                      <div key={entry.id} className="schedule-item">
+                      <Link
+                        to={`/schedule?id=${entry.id}`}
+                        key={entry.id}
+                        className="schedule-item link-item"
+                      >
                         <div className="time">
                           {entry.startTime} - {entry.endTime}
                         </div>
                         <div className="subject">{entry.subject}</div>
                         {entry.location && <div className="location">📍 {entry.location}</div>}
                         {entry.notes && <div className="notes">📝 {entry.notes}</div>}
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </div>
@@ -162,13 +171,13 @@ export default function Dashboard() {
               ) : (
                 <div className="schedule-list">
                   {todaySchedule.map((entry) => (
-                    <div key={entry.id} className="schedule-item">
+                    <Link key={entry.id} to={`/schedule?id=${entry.id}`} className="schedule-item link-item">
                       <div className="time">
                         {entry.startTime} - {entry.endTime}
                       </div>
                       <div className="subject">{entry.subject}</div>
                       {entry.location && <div className="location">📍 {entry.location}</div>}
-                    </div>
+                    </Link>
                   ))}
                 </div>
               )}
@@ -183,7 +192,7 @@ export default function Dashboard() {
               ) : (
                 <div className="task-list">
                   {upcomingTasks.map((task) => (
-                    <div key={task.id} className="task-item">
+                    <Link key={task.id} to={`/tasks?id=${task.id}`} className="task-item link-item">
                       <div className="task-info">
                         <div className="task-title">{task.title}</div>
                         <div className="task-meta">
@@ -191,7 +200,7 @@ export default function Dashboard() {
                           <span className={`badge priority-${task.priority}`}>{task.priority}</span>
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               )}

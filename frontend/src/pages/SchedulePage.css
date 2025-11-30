@@ -489,3 +489,11 @@
     background: #efefef;
     color: #666;
 }
+
+/* Highlighted entry (navigated-to from dashboard) */
+.highlight {
+    box-shadow: 0 10px 24px rgba(102, 126, 234, 0.25);
+    transform: translateX(6px);
+    border-left-color: #ffcc00;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}

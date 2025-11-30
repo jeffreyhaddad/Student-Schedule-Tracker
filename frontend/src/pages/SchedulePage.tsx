@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useSchedule } from '../hooks/useSchedule';
 import './SchedulePage.css';
 
@@ -165,6 +166,25 @@ export default function SchedulePage() {
     {} as Record<number, typeof entries>,
   );
 
+  // Highlight & scroll if `?id=` param present
+  // This will jump to the schedule entry referenced from the dashboard
+  const location = useLocation();
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+    if (!id) return;
+    const el = document.getElementById(`entry-${id}`);
+    if (el) {
+      try {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('highlight');
+        setTimeout(() => el.classList.remove('highlight'), 3000);
+      } catch (err) {
+        // ignore
+      }
+    }
+  }, [location.search, entries]);
+
   return (
     <div className="schedule-page">
       <div className="schedule-header">
@@ -310,6 +330,7 @@ export default function SchedulePage() {
                 ) : (
                   scheduleByDay[index]?.map((entry) => (
                     <div
+                      id={`entry-${entry.id}`}
                       key={entry.id}
                       className="entry-card"
                     >

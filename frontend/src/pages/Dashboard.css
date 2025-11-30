@@ -272,6 +272,13 @@
     transition: all 0.2s ease;
 }
 
+/* Links used for clickable dashboard items */
+.link-item {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
 .task-item:hover {
     background: linear-gradient(135deg, #faf5ff 0%, #f5f0ff 100%);
     transform: translateX(4px);

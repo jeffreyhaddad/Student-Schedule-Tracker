@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTasks } from '../hooks/useTasks';
 import './TasksPage.css';
 
@@ -120,6 +121,25 @@ export default function TasksPage() {
     }
   };
 
+  const location = useLocation();
+
+  // Scroll and highlight a task if `?id=<taskId>` is present in the URL
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+    if (!id) return;
+    const el = document.getElementById(`task-${id}`);
+    if (el) {
+      try {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('highlight');
+        setTimeout(() => el.classList.remove('highlight'), 3000);
+      } catch (err) {
+        // ignore
+      }
+    }
+  }, [location.search, tasks]);
+
   return (
     <div className="tasks-page">
       <div className="tasks-header">
@@ -224,6 +244,7 @@ export default function TasksPage() {
         ) : (
           tasks.map((task) => (
             <div
+              id={`task-${task.id}`}
               key={task.id}
               className="task-card"
             >
