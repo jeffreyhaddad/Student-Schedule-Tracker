@@ -155,21 +155,38 @@ Once the backend is running, visit `http://localhost:3000/docs` to explore the A
 - Protected routes and endpoints
 
 ### Task Management
-- Create, read, update, and delete tasks
-- Set task priorities (low, normal, high)
-- Assign due dates
-- Add descriptions and categories
-- Track task status (pending, in-progress, completed)
+- **Create, read, update, and delete tasks** with full CRUD operations
+- **Inline editing**: Click directly on task title or description to edit
+- **Status management**: Click status badge to cycle through pending → in-progress → completed
+- **Priority management**: Click priority badge to cycle through low → normal → high
+- **Set task priorities** (low, normal, high)
+- **Assign due dates** with validation
+- **Add descriptions and categories**
+- **Track task status** (pending, in-progress, completed)
+- Real-time error handling with inline error display
 
 ### Schedule Management
-- Create and manage schedule entries
-- Organize time slots
-- Track scheduled activities
+- **Create and manage schedule entries** with location and notes
+- **Inline editing**: Click on subject, location, or notes to edit
+- **Inline time editing**: Click start/end times to modify with HH:MM format
+- **Quick class duplication**: Click duplicate button to open day selector, instantly copy to any day
+- **Time conflict prevention**: Backend validation prevents overlapping schedules
+- **Organize time slots** with visual day-based layout
+- **Track scheduled activities** throughout your week
 
 ### Dashboard
-- View summary of tasks and schedules
-- Quick access to active tasks
-- User profile management
+- **Statistics overview**: Display counts of pending, in-progress, and completed tasks
+- **Quick search**: Search and filter tasks by title and category
+- **View summary** of upcoming tasks and schedules
+- **Quick access** to active tasks and this week's classes
+- **User profile management** with logout functionality
+
+### Modern User Experience
+- **Responsive design**: Works seamlessly on desktop, tablet, and mobile
+- **Gradient design**: Modern gradient backgrounds with smooth animations
+- **Interactive elements**: Hover effects and smooth transitions (0.3s ease)
+- **Inline error display**: Validation errors shown in red alert boxes instead of popups
+- **Fast operations**: No page reloads required for edits, status changes, or duplications
 
 ## Development
 
@@ -194,6 +211,13 @@ npm run build
 npm run start:prod
 ```
 
+The API provides:
+- RESTful endpoints with complete CRUD operations
+- JWT authentication with protected routes
+- Comprehensive validation with detailed error messages
+- Time conflict detection for schedules
+- Swagger documentation at `http://localhost:3000/docs`
+
 ### Frontend Development
 
 ```bash
@@ -211,6 +235,14 @@ npm run preview
 # Run linting
 npm run lint
 ```
+
+The frontend features:
+- React 19 with TypeScript for type safety
+- Vite for fast hot module replacement during development
+- Inline editing system with click-to-edit paradigm
+- Interactive badge system for quick status/priority changes
+- Modal popup for complex operations (day selection)
+- Bootstrap 5 with custom gradient styling
 
 ## Database Schema
 
