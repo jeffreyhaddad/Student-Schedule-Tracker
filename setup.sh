@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 echo "
 ╔════════════════════════════════════════════════════════════════╗
@@ -14,7 +15,11 @@ cd "$ROOT_DIR"
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
+RED='\033[0;31m'
 NC='\033[0m' # No Color
+
+# Error handler
+trap 'echo -e "${RED}❌ Setup failed!${NC}"; exit 1' ERR
 
 # 1️⃣  Copy example environment files
 echo -e "${BLUE}Step 1: Setting up environment files${NC}"
@@ -35,13 +40,22 @@ fi
 
 # 2️⃣  Install dependencies
 echo -e "\n${BLUE}Step 2: Installing dependencies${NC}"
+
 echo "  Installing API dependencies..."
-(cd api && npm install > /dev/null 2>&1)
-echo -e "  ${GREEN}✓${NC} API ready"
+if (cd api && npm install); then
+  echo -e "  ${GREEN}✓${NC} API dependencies installed"
+else
+  echo -e "  ${RED}✗${NC} Failed to install API dependencies"
+  exit 1
+fi
 
 echo "  Installing frontend dependencies..."
-(cd frontend && npm install > /dev/null 2>&1)
-echo -e "  ${GREEN}✓${NC} Frontend ready"
+if (cd frontend && npm install); then
+  echo -e "  ${GREEN}✓${NC} Frontend dependencies installed"
+else
+  echo -e "  ${RED}✗${NC} Failed to install frontend dependencies"
+  exit 1
+fi
 
 # 3️⃣  Attempt database setup if psql available
 echo -e "\n${BLUE}Step 3: Setting up database${NC}"
@@ -49,22 +63,29 @@ echo -e "\n${BLUE}Step 3: Setting up database${NC}"
 if command -v psql >/dev/null 2>&1; then
   if [ -f "api/.env" ]; then
     set -a
+    # shellcheck disable=SC1091
     . api/.env
     set +a
     
-    export PGPASSWORD="${DB_PASSWORD}"
+    export PGPASSWORD="${DATABASE_PASSWORD}"
     
     # Create database
-    if ! psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -tc "SELECT 1 FROM pg_database WHERE datname = '$DB_NAME'" 2>/dev/null | grep -q 1; then
-      psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -c "CREATE DATABASE \"$DB_NAME\";" 2>/dev/null
-      echo -e "  ${GREEN}✓${NC} Created database '$DB_NAME'"
+    if ! psql -h "$DATABASE_HOST" -p "$DATABASE_PORT" -U "$DATABASE_USER" -tc "SELECT 1 FROM pg_database WHERE datname = '$DATABASE_NAME'" 2>/dev/null | grep -q 1; then
+      if psql -h "$DATABASE_HOST" -p "$DATABASE_PORT" -U "$DATABASE_USER" -c "CREATE DATABASE \"$DATABASE_NAME\";" 2>/dev/null; then
+        echo -e "  ${GREEN}✓${NC} Created database '$DATABASE_NAME'"
+      else
+        echo -e "  ${YELLOW}⚠${NC}  Could not create database (may already exist or permission denied)"
+      fi
     else
-      echo -e "  ${GREEN}✓${NC} Database '$DB_NAME' already exists"
+      echo -e "  ${GREEN}✓${NC} Database '$DATABASE_NAME' already exists"
     fi
     
     # Load schema
-    psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f "api/database/schema.sql" > /dev/null 2>&1
-    echo -e "  ${GREEN}✓${NC} Schema loaded"
+    if psql -h "$DATABASE_HOST" -p "$DATABASE_PORT" -U "$DATABASE_USER" -d "$DATABASE_NAME" -f "api/database/schema.sql" > /dev/null 2>&1; then
+      echo -e "  ${GREEN}✓${NC} Schema loaded"
+    else
+      echo -e "  ${YELLOW}⚠${NC}  Could not load schema (may already exist or permission denied)"
+    fi
   fi
 else
   echo -e "  ${YELLOW}⚠${NC}  psql not found - skipping automatic database setup"
@@ -102,4 +123,3 @@ ${GREEN}✅ Setup Complete!${NC}
 📚 For more info, see README.md or api/README.md
 
 EOF
-
