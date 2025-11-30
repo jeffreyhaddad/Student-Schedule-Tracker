@@ -7,50 +7,30 @@ import {
   Put,
   Delete,
   ParseIntPipe,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { StudentService } from './student.service';
 import { CreateStudentDTO } from './dto/create-student.dto';
 import { UpdateStudentDTO } from './dto/update-student.dto';
 
-@Controller('students')
+@Controller('student')
 export class StudentController {
-  constructor(private studentService: StudentService) {}
-
-  @Post()
-  create(@Body() dto: CreateStudentDTO) {
-    return this.studentService.create(dto);
-  }
+  constructor(private studentService: StudentService) { }
 
   @Get()
-  findAll() {
-    return this.studentService.findAll();
+  @UseGuards(JwtAuthGuard)
+  getCurrentStudent(@Request() req: any) {
+    return this.studentService.findById(req.user.id);
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.studentService.findOne(id);
-  }
-
-  @Get('email/:email')
-  findByEmail(@Param('email') email: string) {
-    return this.studentService.findByEmail(email);
-  }
-
-  @Get('username/:username')
-  findByUsername(@Param('username') username: string) {
-    return this.studentService.findByUsername(username);
-  }
-
-  @Put(':id')
-  update(
-    @Param('id', ParseIntPipe) id: number,
+  @Put()
+  @UseGuards(JwtAuthGuard)
+  updateCurrentStudent(
+    @Request() req: any,
     @Body() dto: UpdateStudentDTO,
   ) {
-    return this.studentService.update(id, dto);
-  }
-
-  @Delete(':id')
-  delete(@Param('id', ParseIntPipe) id: number) {
-    return this.studentService.delete(id);
+    return this.studentService.update(req.user.id, dto);
   }
 }

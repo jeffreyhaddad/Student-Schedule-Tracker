@@ -1,3 +1,5 @@
+import { authService } from './authService';
+
 export interface Task {
   id: number;
   studentId: number;
@@ -20,14 +22,20 @@ export interface CreateTaskDTO {
   category?: string;
 }
 
-const API_URL = 'http://localhost:3000/tasks';
+const API_URL = 'http://localhost:3000/task';
+
+const getAuthHeaders = (): HeadersInit => {
+  const token = authService.getToken();
+  return {
+    'Content-Type': 'application/json',
+    ...(token && { Authorization: `Bearer ${token}` }),
+  };
+};
 
 export const tasksService = {
   getAll: async (studentId: number): Promise<Task[]> => {
     const response = await fetch(API_URL, {
-      headers: {
-        'x-student-id': studentId.toString(),
-      },
+      headers: getAuthHeaders(),
     });
 
     if (!response.ok) throw new Error('Failed to fetch tasks');
@@ -37,37 +45,35 @@ export const tasksService = {
   create: async (studentId: number, taskData: CreateTaskDTO): Promise<Task> => {
     const response = await fetch(API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-student-id': studentId.toString(),
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(taskData),
     });
 
-    if (!response.ok) throw new Error('Failed to create task');
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to create task');
+    }
     return response.json();
   },
 
   update: async (studentId: number, taskId: number, taskData: Partial<CreateTaskDTO>): Promise<Task> => {
     const response = await fetch(`${API_URL}/${taskId}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-student-id': studentId.toString(),
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(taskData),
     });
 
-    if (!response.ok) throw new Error('Failed to update task');
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to update task');
+    }
     return response.json();
   },
 
   delete: async (studentId: number, taskId: number): Promise<void> => {
     const response = await fetch(`${API_URL}/${taskId}`, {
       method: 'DELETE',
-      headers: {
-        'x-student-id': studentId.toString(),
-      },
+      headers: getAuthHeaders(),
     });
 
     if (!response.ok) throw new Error('Failed to delete task');

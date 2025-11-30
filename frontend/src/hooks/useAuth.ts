@@ -19,7 +19,7 @@ export function useAuth() {
 
     try {
       const response = await authService.register(userData);
-      setUser(response);
+      setUser(response.user);
       return response;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Registration failed';
@@ -39,7 +39,7 @@ export function useAuth() {
 
     try {
       const response = await authService.login(credentials);
-      setUser(response);
+      setUser(response.user);
       return response;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed';

@@ -1,3 +1,5 @@
+import { authService } from './authService';
+
 export interface ScheduleEntry {
   id: number;
   studentId: number;
@@ -24,12 +26,18 @@ export interface CreateScheduleDTO {
 
 const API_URL = 'http://localhost:3000/schedule';
 
+const getAuthHeaders = (): HeadersInit => {
+  const token = authService.getToken();
+  return {
+    'Content-Type': 'application/json',
+    ...(token && { Authorization: `Bearer ${token}` }),
+  };
+};
+
 export const scheduleService = {
   getAll: async (studentId: number): Promise<ScheduleEntry[]> => {
     const response = await fetch(API_URL, {
-      headers: {
-        'x-student-id': studentId.toString(),
-      },
+      headers: getAuthHeaders(),
     });
 
     if (!response.ok) throw new Error('Failed to fetch schedule');
@@ -39,14 +47,14 @@ export const scheduleService = {
   create: async (studentId: number, scheduleData: CreateScheduleDTO): Promise<ScheduleEntry> => {
     const response = await fetch(API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-student-id': studentId.toString(),
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(scheduleData),
     });
 
-    if (!response.ok) throw new Error('Failed to create schedule entry');
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to create schedule entry');
+    }
     return response.json();
   },
 
@@ -57,23 +65,21 @@ export const scheduleService = {
   ): Promise<ScheduleEntry> => {
     const response = await fetch(`${API_URL}/${scheduleId}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-student-id': studentId.toString(),
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(scheduleData),
     });
 
-    if (!response.ok) throw new Error('Failed to update schedule entry');
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to update schedule entry');
+    }
     return response.json();
   },
 
   delete: async (studentId: number, scheduleId: number): Promise<void> => {
     const response = await fetch(`${API_URL}/${scheduleId}`, {
       method: 'DELETE',
-      headers: {
-        'x-student-id': studentId.toString(),
-      },
+      headers: getAuthHeaders(),
     });
 
     if (!response.ok) throw new Error('Failed to delete schedule entry');
