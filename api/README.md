@@ -26,41 +26,46 @@ This is the backend service for the Student Tracker application, built with Nest
 
 ## Installation
 
-### 1. Install Dependencies
+### Quick Setup (from project root)
+
+From the project root directory, run:
+
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+This handles dependencies, environment files, and database setup automatically.
+
+### Manual Setup
+
+**1. Install Dependencies**
 
 ```bash
 npm install
 ```
 
-### 2. Set Up Database
+**2. Configure Environment Variables**
 
 ```bash
-bash setup-db.sh
+cp example.env .env
+# Edit .env with your database credentials if needed
 ```
 
-This script will:
-- Create the `student_tracker` database
-- Load the schema from `database/schema.sql`
-- Insert sample test data
+**3. Set Up Database**
 
-### 3. Configure Environment Variables
+```bash
+# Create database
+psql -U postgres -c "CREATE DATABASE student_tracker;"
 
-Create a `.env` file in the project root:
+# Load schema
+psql -U postgres -d student_tracker -f database/schema.sql
+```
 
-```env
-# Database Configuration
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-DATABASE_USER=postgres
-DATABASE_PASSWORD=your_postgres_password
-DATABASE_NAME=student_tracker
+**4. Start Development Server**
 
-# JWT Configuration
-JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
-
-# Server Configuration
-PORT=3000
-NODE_ENV=development
+```bash
+npm run start:dev
 ```
 
 ## Running the Application

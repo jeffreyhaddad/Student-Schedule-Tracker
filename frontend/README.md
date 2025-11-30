@@ -23,19 +23,32 @@ This is the frontend client for the Student Tracker application. It provides an 
 
 ## Installation
 
-### 1. Install Dependencies
+### Quick Setup (from project root)
+
+From the project root directory, run:
+
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+This handles dependencies and environment configuration automatically.
+
+### Manual Setup
+
+**1. Install Dependencies**
 
 ```bash
 npm install
 ```
 
-### 2. Configure Backend Connection
+**2. Configure Backend Connection**
 
-By default, the application expects the backend API at `http://localhost:3000`. If your backend is running on a different URL, update the API base URL in `src/services/`:
+```bash
+cp example.env .env.local
+```
 
-- `src/services/authService.ts`
-- `src/services/tasksService.ts`
-- `src/services/scheduleService.ts`
+By default, the app connects to `http://localhost:3000`. Edit `VITE_API_URL` in `.env.local` if needed.
 
 ## Running the Application
 

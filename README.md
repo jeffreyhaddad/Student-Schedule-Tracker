@@ -64,60 +64,82 @@ student_tracker_final/
 
 ### Prerequisites
 - Node.js 16+ and npm
-- PostgreSQL 12+
+- PostgreSQL 12+ (optional — setup script can help with initialization)
 
-### Setup Instructions
+### Automated Setup (Recommended)
 
-1. **Clone the repository and install dependencies:**
+The fastest way to get started — runs in one command:
+
+```bash
+# Make the setup script executable
+chmod +x setup.sh
+
+# Run it
+./setup.sh
+```
+
+The script will:
+1. ✅ Create `.env` files from templates
+2. ✅ Install all dependencies
+3. ✅ Create the PostgreSQL database (if `psql` is available)
+4. ✅ Load the database schema
+
+Then follow the printed instructions to start both services.
+
+### Manual Setup
+
+If you prefer to set up manually or the script doesn't work for your environment:
+
+1. **Clone and navigate:**
+
+```bash
+git clone <repo-url>
+cd studenttracker
+```
+
+2. **Copy environment templates:**
+
+```bash
+# Backend
+cp api/example.env api/.env
+
+# Frontend
+cp frontend/example.env frontend/.env.local
+```
+
+3. **Edit `.env` files if needed** (adjust database credentials in `api/.env`)
+
+4. **Install dependencies:**
 
 ```bash
 # Install API dependencies
-cd api
-npm install
+cd api && npm install
 
 # Install frontend dependencies
-cd ../frontend
-npm install
+cd ../frontend && npm install
 ```
 
-2. **Set up the database:**
+5. **Set up database:**
 
 ```bash
-cd api
-bash setup-db.sh
+# Create database
+psql -U postgres -c "CREATE DATABASE student_tracker;"
+
+# Load schema
+psql -U postgres -d student_tracker -f api/database/schema.sql
 ```
 
-3. **Configure environment variables:**
-
-Create a `.env` file in the `api/` directory:
-
-```env
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-DATABASE_USER=postgres
-DATABASE_PASSWORD=your_password
-DATABASE_NAME=student_tracker
-JWT_SECRET=your_secret_key
-PORT=3000
-```
-
-4. **Start the backend:**
+6. **Start services:**
 
 ```bash
-cd api
-npm run start:dev
+# Terminal 1 - Backend
+cd api && npm run start:dev
+
+# Terminal 2 - Frontend
+cd frontend && npm run dev
 ```
 
-The API will be available at `http://localhost:3000`
-
-5. **Start the frontend (in a new terminal):**
-
-```bash
-cd frontend
-npm run dev
-```
-
-The frontend will be available at `http://localhost:5173`
+The API will be available at `http://localhost:3000` and frontend at `http://localhost:5173`.
 
 ## API Documentation
 
