@@ -25,7 +25,21 @@ trap 'echo -e "${RED}❌ Setup failed!${NC}"; exit 1' ERR
 echo -e "${BLUE}Step 1: Setting up environment files${NC}"
 
 if [ ! -f "api/.env" ]; then
-  cp api/example.env api/.env
+  cat > api/.env <<'ENVFILE'
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=student_tracker
+
+# JWT Configuration
+JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
+
+# Server Configuration
+PORT=3000
+NODE_ENV=development
+ENVFILE
   echo -e "${GREEN}✓${NC} Created api/.env"
 else
   echo -e "${GREEN}✓${NC} api/.env already exists"
