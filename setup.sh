@@ -52,18 +52,18 @@ if command -v psql >/dev/null 2>&1; then
     . api/.env
     set +a
     
-    export PGPASSWORD="${DATABASE_PASSWORD}"
+    export PGPASSWORD="${DB_PASSWORD}"
     
     # Create database
-    if ! psql -h "$DATABASE_HOST" -p "$DATABASE_PORT" -U "$DATABASE_USER" -tc "SELECT 1 FROM pg_database WHERE datname = '$DATABASE_NAME'" 2>/dev/null | grep -q 1; then
-      psql -h "$DATABASE_HOST" -p "$DATABASE_PORT" -U "$DATABASE_USER" -c "CREATE DATABASE \"$DATABASE_NAME\";" 2>/dev/null
-      echo -e "  ${GREEN}✓${NC} Created database '$DATABASE_NAME'"
+    if ! psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -tc "SELECT 1 FROM pg_database WHERE datname = '$DB_NAME'" 2>/dev/null | grep -q 1; then
+      psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -c "CREATE DATABASE \"$DB_NAME\";" 2>/dev/null
+      echo -e "  ${GREEN}✓${NC} Created database '$DB_NAME'"
     else
-      echo -e "  ${GREEN}✓${NC} Database '$DATABASE_NAME' already exists"
+      echo -e "  ${GREEN}✓${NC} Database '$DB_NAME' already exists"
     fi
     
     # Load schema
-    psql -h "$DATABASE_HOST" -p "$DATABASE_PORT" -U "$DATABASE_USER" -d "$DATABASE_NAME" -f "api/database/schema.sql" > /dev/null 2>&1
+    psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f "api/database/schema.sql" > /dev/null 2>&1
     echo -e "  ${GREEN}✓${NC} Schema loaded"
   fi
 else
