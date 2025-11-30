@@ -8,59 +8,61 @@ import {
   Delete,
   ParseIntPipe,
   Query,
-  Headers,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ScheduleService } from './schedule.service';
 import { CreateScheduleDTO } from './dto/create-schedule.dto';
 import { UpdateScheduleDTO } from './dto/update-schedule.dto';
 
 @Controller('schedule')
 export class ScheduleController {
-  constructor(private scheduleService: ScheduleService) {}
+  constructor(private scheduleService: ScheduleService) { }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   create(
-    @Headers('x-student-id') studentIdHeader: string,
+    @Request() req: any,
     @Body() dto: CreateScheduleDTO,
   ) {
-    const studentId = parseInt(studentIdHeader, 10);
-    return this.scheduleService.create(studentId, dto);
+    return this.scheduleService.create(req.user.id, dto);
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   findAll(
-    @Headers('x-student-id') studentIdHeader: string,
+    @Request() req: any,
     @Query('weekday', new ParseIntPipe({ optional: true })) weekday?: number,
   ) {
-    const studentId = parseInt(studentIdHeader, 10);
-    return this.scheduleService.findAll(studentId, weekday);
+    return this.scheduleService.findAll(req.user.id, weekday);
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   findOne(
     @Param('id', ParseIntPipe) id: number,
-    @Headers('x-student-id') studentIdHeader: string,
+    @Request() req: any,
   ) {
-    const studentId = parseInt(studentIdHeader, 10);
-    return this.scheduleService.findOne(id, studentId);
+    return this.scheduleService.findOne(id, req.user.id);
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Headers('x-student-id') studentIdHeader: string,
+    @Request() req: any,
     @Body() dto: UpdateScheduleDTO,
   ) {
-    const studentId = parseInt(studentIdHeader, 10);
-    return this.scheduleService.update(id, studentId, dto);
+    return this.scheduleService.update(id, req.user.id, dto);
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   delete(
     @Param('id', ParseIntPipe) id: number,
-    @Headers('x-student-id') studentIdHeader: string,
+    @Request() req: any,
   ) {
-    const studentId = parseInt(studentIdHeader, 10);
-    return this.scheduleService.delete(id, studentId);
+    return this.scheduleService.delete(id, req.user.id);
   }
 }

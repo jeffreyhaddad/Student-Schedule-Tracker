@@ -8,60 +8,62 @@ import {
   Delete,
   ParseIntPipe,
   Query,
-  Headers,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { TaskService } from './task.service';
 import { CreateTaskDTO } from './dto/create-task.dto';
 import { UpdateTaskDTO } from './dto/update-task.dto';
 
-@Controller('tasks')
+@Controller('task')
 export class TaskController {
-  constructor(private taskService: TaskService) {}
+  constructor(private taskService: TaskService) { }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   create(
-    @Headers('x-student-id') studentIdHeader: string,
+    @Request() req: any,
     @Body() dto: CreateTaskDTO,
   ) {
-    const studentId = parseInt(studentIdHeader, 10);
-    return this.taskService.create(studentId, dto);
+    return this.taskService.create(req.user.id, dto);
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   findAll(
-    @Headers('x-student-id') studentIdHeader: string,
+    @Request() req: any,
     @Query('sort') sort?: string,
     @Query('order') order?: string,
   ) {
-    const studentId = parseInt(studentIdHeader, 10);
-    return this.taskService.findAll(studentId, sort, order);
+    return this.taskService.findAll(req.user.id, sort, order);
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   findOne(
     @Param('id', ParseIntPipe) id: number,
-    @Headers('x-student-id') studentIdHeader: string,
+    @Request() req: any,
   ) {
-    const studentId = parseInt(studentIdHeader, 10);
-    return this.taskService.findOne(id, studentId);
+    return this.taskService.findOne(id, req.user.id);
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Headers('x-student-id') studentIdHeader: string,
+    @Request() req: any,
     @Body() dto: UpdateTaskDTO,
   ) {
-    const studentId = parseInt(studentIdHeader, 10);
-    return this.taskService.update(id, studentId, dto);
+    return this.taskService.update(id, req.user.id, dto);
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   delete(
     @Param('id', ParseIntPipe) id: number,
-    @Headers('x-student-id') studentIdHeader: string,
+    @Request() req: any,
   ) {
-    const studentId = parseInt(studentIdHeader, 10);
-    return this.taskService.delete(id, studentId);
+    return this.taskService.delete(id, req.user.id);
   }
 }

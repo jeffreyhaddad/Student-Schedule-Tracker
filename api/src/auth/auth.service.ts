@@ -1,4 +1,5 @@
 import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { StudentService } from 'src/student/student.service';
 import { CreateStudentDTO } from 'src/student/dto/create-student.dto';
 import { LoginDto } from './Dto/login.dto';
@@ -6,13 +7,10 @@ import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class AuthService {
-  private sessions: Map<string, number> = new Map(); // sessionId -> studentId
-
-  constructor(private studentService: StudentService) {}
-
-  private generateSessionId(): string {
-    return `${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-  }
+  constructor(
+    private studentService: StudentService,
+    private jwtService: JwtService,
+  ) { }
 
   async register(dto: CreateStudentDTO) {
     try {
@@ -37,14 +35,13 @@ export class AuthService {
       password: hashedPassword,
     });
 
-    const sessionId = this.generateSessionId();
-    this.sessions.set(sessionId, student.id);
+    const payload = { sub: student.id, username: student.username };
+    const access_token = this.jwtService.sign(payload);
 
     const { password, ...safe } = student as any;
     return {
-      ...safe,
-      sessionId,
-      message: 'Registration successful',
+      access_token,
+      user: safe,
     };
   }
 
@@ -60,24 +57,29 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const sessionId = this.generateSessionId();
-    this.sessions.set(sessionId, student.id);
+    const payload = { sub: student.id, username: student.username };
+    const access_token = this.jwtService.sign(payload);
 
     const { password, ...safe } = student as any;
     return {
-      ...safe,
-      sessionId,
-      message: 'Login successful',
+      access_token,
+      user: safe,
     };
   }
 
-  async getProfile(sessionId: string) {
-    const studentId = this.sessions.get(sessionId);
-
-    if (!studentId) {
-      throw new UnauthorizedException('Invalid or expired session');
+  async validateToken(token: string) {
+    try {
+      const payload = this.jwtService.verify(token);
+      const student = await this.studentService.findById(payload.sub);
+      return student;
+    } catch (error) {
+      throw new UnauthorizedException('Invalid or expired token');
     }
+  }
 
-    return this.studentService.findOne(studentId);
+  async getProfile(studentId: number) {
+    const student = await this.studentService.findById(studentId);
+    const { password, ...safe } = student as any;
+    return safe;
   }
 }

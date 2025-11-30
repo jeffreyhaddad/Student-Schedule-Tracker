@@ -10,7 +10,7 @@ export class StudentService {
   constructor(
     @InjectRepository(Student)
     private studentRepository: Repository<Student>,
-  ) {}
+  ) { }
 
   async create(data: CreateStudentDTO) {
     const student = this.studentRepository.create(data);
@@ -23,7 +23,7 @@ export class StudentService {
     });
   }
 
-  async findOne(id: number) {
+  async findById(id: number) {
     const student = await this.studentRepository.findOne({
       where: { id },
       relations: ['tasks', 'schedules'],
